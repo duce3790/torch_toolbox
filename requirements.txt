@@ -1,0 +1,10 @@
+torch>=1.13
+nvidia-ml-py
+hydra-core
+omegaconf
+torchtext
+torchdata
+torchvision
+transformers
+datasets
+git+ssh://git@github.com/cyyever/naive_python_lib.git@main#egg=cyy_naive_lib
