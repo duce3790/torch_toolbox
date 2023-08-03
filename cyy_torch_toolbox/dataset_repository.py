@@ -32,7 +32,8 @@ except ModuleNotFoundError:
 try:
     import datasets
 
-    has_hugging_face = True
+    # has_hugging_face = True
+    has_hugging_face = False
 except ModuleNotFoundError:
     has_hugging_face = False
 
