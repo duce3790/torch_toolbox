@@ -19,8 +19,8 @@ try:
 except ModuleNotFoundError:
     has_torchaudio = False
 
-if has_torchaudio:
-    import cyy_torch_toolbox.datasets.audio as local_audio_datasets
+# if has_torchaudio:
+#     import cyy_torch_toolbox.datasets.audio as local_audio_datasets
 
 try:
     import medmnist
