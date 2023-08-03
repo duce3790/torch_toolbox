@@ -30,13 +30,14 @@ try:
 except ModuleNotFoundError:
     has_medmnist = False
 
-try:
-    import datasets
+# try:
+#     import datasets
 
-    has_hugging_face = True
-    # has_hugging_face = False
-except ModuleNotFoundError:
-    has_hugging_face = False
+#     has_hugging_face = True
+#     # has_hugging_face = False
+# except ModuleNotFoundError:
+#     has_hugging_face = False
+has_hugging_face = False
 
 
 from cyy_naive_lib.reflection import get_class_attrs
