@@ -26,9 +26,9 @@ class IMAGENET(VisionDataset):
         self.loader = default_loader
         self.split = verify_str_arg(split, "split", ("train", "val",))
 
-        if self._check_integrity():
-            print('Files already downloaded and verified.')
-        elif download:
+        # if self._check_integrity():
+        #     print('Files already downloaded and verified.')
+        if download:
             self._download()
         else:
             raise RuntimeError(
