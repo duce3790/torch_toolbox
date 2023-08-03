@@ -15,14 +15,14 @@ class IMAGENET(VisionDataset):
     def __init__(
         self,
         root: str,
-        train: bool = True,
-        split='train',
+        train: bool = True,split='train',
         transform: Optional[Callable] = None,
         target_transform: Optional[Callable] = None,
         download: bool = False,
     ) -> None:
         super().__init__(root, transform=transform, target_transform=target_transform)
-        self.dataset_path = os.path.join(root, self.base_folder)
+        # self.dataset_path = os.path.join(root, self.base_folder)
+        self.dataset_path = self.root
         self.loader = default_loader
         self.split = verify_str_arg(split, "split", ("train", "val",))
 
