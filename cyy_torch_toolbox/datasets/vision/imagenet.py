@@ -11,7 +11,7 @@ from torchvision.datasets.folder import default_loader
 from torchvision.datasets.utils import extract_archive, check_integrity, download_url, verify_str_arg
 
 class IMAGENET(VisionDataset):
-
+    base_folder = 'tiny-imagenet-200/'
     def __init__(
         self,
         root: str,
@@ -21,8 +21,7 @@ class IMAGENET(VisionDataset):
         download: bool = False,
     ) -> None:
         super().__init__(root, transform=transform, target_transform=target_transform)
-        # self.dataset_path = os.path.join(root, self.base_folder)
-        self.dataset_path = self.root
+        self.dataset_path = os.path.join(self.root, self.base_folder)
         self.loader = default_loader
         self.split = verify_str_arg(split, "split", ("train", "val",))
 
@@ -39,7 +38,7 @@ class IMAGENET(VisionDataset):
 
         _, class_to_idx = find_classes(os.path.join(self.dataset_path, 'wnids.txt'))
 
-        self.data = make_dataset(self.root, self.split, class_to_idx)
+        self.data = make_dataset(self.dataset_path, self.split, class_to_idx)
 
     def _download(self):
         print('Downloading...')
