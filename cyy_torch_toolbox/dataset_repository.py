@@ -12,12 +12,13 @@ try:
 except ModuleNotFoundError:
     has_torchtext = False
 
-try:
-    # import torchaudio
+# try:
+#     # import torchaudio
 
-    has_torchaudio = True
-except ModuleNotFoundError:
-    has_torchaudio = False
+#     has_torchaudio = True
+# except ModuleNotFoundError:
+#     has_torchaudio = False
+has_torchaudio = False
 
 # if has_torchaudio:
 #     import cyy_torch_toolbox.datasets.audio as local_audio_datasets
@@ -32,8 +33,8 @@ except ModuleNotFoundError:
 try:
     import datasets
 
-    # has_hugging_face = True
-    has_hugging_face = False
+    has_hugging_face = True
+    # has_hugging_face = False
 except ModuleNotFoundError:
     has_hugging_face = False
 
