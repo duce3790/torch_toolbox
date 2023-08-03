@@ -7,38 +7,51 @@ import torch
 from PIL import Image
 from torchvision.datasets import VisionDataset
 from torchvision.datasets.utils import download_and_extract_archive
-
+from torchvision.datasets.folder import default_loader
+from torchvision.datasets.utils import extract_archive, check_integrity, download_url, verify_str_arg
 
 class IMAGENET(VisionDataset):
-    
+
     def __init__(
         self,
         root: str,
         train: bool = True,
+        split='train',
         transform: Optional[Callable] = None,
         target_transform: Optional[Callable] = None,
         download: bool = False,
     ) -> None:
         super().__init__(root, transform=transform, target_transform=target_transform)
-        # self.train = train  # training set or test set
+        self.dataset_path = os.path.join(root, self.base_folder)
+        self.loader = default_loader
+        self.split = verify_str_arg(split, "split", ("train", "val",))
 
-        # if download:
-        #     self.download()
+        if self._check_integrity():
+            print('Files already downloaded and verified.')
+        elif download:
+            self._download()
+        else:
+            raise RuntimeError(
+                'Dataset not found. You can use download=True to download it.')
+        if not os.path.isdir(self.dataset_path):
+            print('Extracting...')
+            extract_archive(os.path.join(root, self.filename))
 
-        # if not self._check_exists():
-        #     raise RuntimeError(
-        #         "Dataset not found." + " You can use download=True to download it"
-        #     )
+        _, class_to_idx = find_classes(os.path.join(self.dataset_path, 'wnids.txt'))
 
-        # if self.train:
-        #     data_file = self.training_file
-        # else:
-        #     data_file = self.test_file
-        # self.data, self.targets, self.users = torch.load(
-        #     os.path.join(self.processed_folder, data_file)
-        # )
+        self.data = make_dataset(self.root, self.base_folder, self.split, class_to_idx)
 
-    def __getitem__(self, index: int) -> Tuple[Any, Any, Any]:
+    def _download(self):
+        print('Downloading...')
+        download_url(self.url, root=self.root, filename=self.filename)
+        print('Extracting...')
+        extract_archive(os.path.join(self.root, self.filename))
+
+    def _check_integrity(self):
+        return check_integrity(os.path.join(self.root, self.filename), self.md5)
+
+
+    def __getitem__(self, index: int):
         """
         Args:
             index (int): Index
@@ -59,8 +72,55 @@ class IMAGENET(VisionDataset):
         #     target = self.target_transform(target)
 
         # return img, target, {"user": self.users[index]}
+        
+        img_path, target = self.data[index]
+        image = self.loader(img_path)
 
+        if self.transform is not None:
+            image = self.transform(image)
+        if self.target_transform is not None:
+            target = self.target_transform(target)
+
+        return image, target
+    
     def __len__(self) -> int:
         return len(self.data)
 
+def find_classes(class_file):
+    with open(class_file) as r:
+        classes = list(map(lambda s: s.strip(), r.readlines()))
 
+    classes.sort()
+    class_to_idx = {classes[i]: i for i in range(len(classes))}
+
+    return classes, class_to_idx
+
+
+def make_dataset(root, base_folder, dirname, class_to_idx):
+    images = []
+    dir_path = os.path.join(root, base_folder, dirname)
+
+    if dirname == 'train':
+        for fname in sorted(os.listdir(dir_path)):
+            cls_fpath = os.path.join(dir_path, fname)
+            if os.path.isdir(cls_fpath):
+                cls_imgs_path = os.path.join(cls_fpath, 'images')
+                for imgname in sorted(os.listdir(cls_imgs_path)):
+                    path = os.path.join(cls_imgs_path, imgname)
+                    item = (path, class_to_idx[fname])
+                    images.append(item)
+    else:
+        imgs_path = os.path.join(dir_path, 'images')
+        imgs_annotations = os.path.join(dir_path, 'val_annotations.txt')
+
+        with open(imgs_annotations) as r:
+            data_info = map(lambda s: s.split('\t'), r.readlines())
+
+        cls_map = {line_data[0]: line_data[1] for line_data in data_info}
+
+        for imgname in sorted(os.listdir(imgs_path)):
+            path = os.path.join(imgs_path, imgname)
+            item = (path, class_to_idx[cls_map[imgname]])
+            images.append(item)
+
+    return images
