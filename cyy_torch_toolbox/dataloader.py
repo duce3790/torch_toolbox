@@ -157,7 +157,7 @@ def get_dataloader(
 
     dataset = dc.get_dataset(phase)
     original_dataset = dc.get_original_dataset(phase)
-    # We use DALI for ImageFolder only
+    # We use DALI for ImageFolder only``
     if (
         has_dali
         and use_dali

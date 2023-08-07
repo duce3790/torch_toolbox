@@ -10,7 +10,7 @@ from torchvision.datasets.utils import download_and_extract_archive
 from torchvision.datasets.folder import default_loader
 from torchvision.datasets.utils import extract_archive, check_integrity, download_url, verify_str_arg
 
-class IMAGENET(VisionDataset):
+class TINYIMAGENET(VisionDataset):
     base_folder = 'tiny-imagenet-200/'
     def __init__(
         self,
@@ -25,20 +25,11 @@ class IMAGENET(VisionDataset):
         self.loader = default_loader
         self.split = verify_str_arg(split, "split", ("train", "val",))
 
-        # if self._check_integrity():
-        #     print('Files already downloaded and verified.')
-        # if download:
-        #     self._download()
-        # else:
-        #     raise RuntimeError(
-        #         'Dataset not found. You can use download=True to download it.')
-        # if not os.path.isdir(self.dataset_path):
-        #     print('Extracting...')
-        #     extract_archive(os.path.join(root, self.filename))
-
         _, class_to_idx = find_classes(os.path.join(self.dataset_path, 'wnids.txt'))
 
-        self.data = make_dataset(self.dataset_path, self.split, class_to_idx)
+        # self.data = make_dataset(self.dataset_path, self.split, class_to_idx)
+        self.data = make_dataset(self.dataset_path, train, class_to_idx)
+        self.targets = [s[1] for s in self.data]
 
     def _download(self):
         print('Downloading...')
@@ -95,11 +86,17 @@ def find_classes(class_file):
     return classes, class_to_idx
 
 
-def make_dataset(root, dirname, class_to_idx):
+# def make_dataset(root, dirname, class_to_idx):
+def make_dataset(root, train, class_to_idx):
     images = []
-    dir_path = os.path.join(root, dirname)
+    # dir_path = os.path.join(root, dirname)
+    if train:
+        dir_path = os.path.join(root, "train")
+    else:
+        dir_path = os.path.join(root, "val")
 
-    if dirname == 'train':
+    # if dirname == 'train':
+    if train:
         for fname in sorted(os.listdir(dir_path)):
             cls_fpath = os.path.join(dir_path, fname)
             if os.path.isdir(cls_fpath):
@@ -114,12 +111,20 @@ def make_dataset(root, dirname, class_to_idx):
 
         with open(imgs_annotations) as r:
             data_info = map(lambda s: s.split('\t'), r.readlines())
+        print(data_info)
 
         cls_map = {line_data[0]: line_data[1] for line_data in data_info}
+        # print("cls_map",cls_map)
+        # print("cls_map",class_to_idx)
 
         for imgname in sorted(os.listdir(imgs_path)):
             path = os.path.join(imgs_path, imgname)
-            item = (path, class_to_idx[cls_map[imgname]])
-            images.append(item)
+            for imgname_ in sorted(os.listdir(path)):
+                path__ = os.path.join(path, imgname_)
+                # print(class_to_idx[cls_map[imgname_]])
+                item = (path__, class_to_idx[cls_map[imgname_]])
+                images.append(item)
+            # item = (path, class_to_idx[cls_map[imgname]])
+            # images.append(item)
 
     return images
