@@ -81,7 +81,7 @@ def find_classes(class_file):
         classes = list(map(lambda s: s.strip(), r.readlines()))
 
     classes.sort()
-    class_to_idx = {classes[i]: i for i in range(len(classes))}
+    class_to_idx = {classes[i]: i for i in range(50)}
 
     return classes, class_to_idx
 
@@ -98,6 +98,8 @@ def make_dataset(root, train, class_to_idx):
     # if dirname == 'train':
     if train:
         for fname in sorted(os.listdir(dir_path)):
+            if fname not in class_to_idx:
+                continue
             cls_fpath = os.path.join(dir_path, fname)
             if os.path.isdir(cls_fpath):
                 cls_imgs_path = os.path.join(cls_fpath, 'images')
@@ -118,6 +120,8 @@ def make_dataset(root, train, class_to_idx):
         # print("cls_map",class_to_idx)
 
         for imgname in sorted(os.listdir(imgs_path)):
+            if imgname not in class_to_idx:
+                continue
             path = os.path.join(imgs_path, imgname)
             for imgname_ in sorted(os.listdir(path)):
                 path__ = os.path.join(path, imgname_)
